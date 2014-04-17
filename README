@@ -10,6 +10,15 @@ Both scripts load configuration data from /etc/nod-rsync.conf,
 a set of key=value pairs, one per line.  All configuration options may be
 overridden in the python program with command-line options.
 
+Both scripts require rsync and ssh.  They work more reliably if you install
+wrapsrv.
+
+The python script works best with the requests, dnspython and python-daemon
+eggs installed.  It fails over to the dig binary if dnspython is not
+installed.
+
+The shell script requires dig and wget.
+
 Both scripts require the following options to be set:
 
 RSYNC_HOST - the hostname or service name of the rsync server
