@@ -197,6 +197,8 @@ def run_rsync(args, known_hosts):
                 '{user}@%h:{remote_path}'.format(
                     user=args.user, remote_path=args.remote_path),
                 args.target], stdin=open('/dev/null'), stdout=rsync_out, stderr=rsync_err)
+
+        return True
     except subprocess.CalledProcessError as e:
         logger.error(str(e))
         rsync_out.seek(0)
@@ -211,11 +213,40 @@ def run_rsync(args, known_hosts):
             for line in stderr.rstrip().split('\n'):
                 logger.error(line.rstrip())
 
+def run_action(args):
+    if not args.action:
+        return
+
+    try:
+        cmd_out = tempfile.TemporaryFile()
+        cmd_err = tempfile.TemporaryFile()
+        logger.info('Running action: "{}"'.format(args.action))
+        subprocess.check_call(args.action, shell=True, stdin=open('/dev/null'), stdout=cmd_out, stderr=cmd_err)
+        cmd_out.seek(0)
+        stdout = cmd_out.read()
+        if stdout:
+            for line in stdout.rstrip().split('\n'):
+                logger.info(line.rstrip())
+    except subprocess.CalledProcessError as e:
+        logger.error(str(e))
+        cmd_out.seek(0)
+        stdout = cmd_out.read()
+        if stdout:
+            for line in stdout.rstrip().split('\n'):
+                logger.error(line.rstrip())
+
+        cmd_err.seek(0)
+        stderr = cmd_err.read()
+        if stderr:
+            for line in stderr.rstrip().split('\n'):
+                logger.error(line.rstrip())
+
 def sync_loop(args):
     known_hosts = KnownHosts(args.known_hosts_url, args.rsync_host)
 
     logger.info('running rsync')
-    run_rsync(args, known_hosts)
+    if run_rsync(args, known_hosts):
+        run_action(args)
 
     t_sleep=random.random()*args.period
     logger.debug('sleeping for {}'.format(t_sleep))
@@ -226,7 +257,8 @@ def sync_loop(args):
         known_hosts.check()
 
         logger.info('running rsync')
-        run_rsync(args, known_hosts)
+        if run_rsync(args, known_hosts):
+            run_action(args)
 
         t_elapsed = time.time() - t_start
         t_remaining = args.period - t_elapsed
@@ -243,6 +275,7 @@ def main():
             help='Increase output verbosity.')
     parser.add_argument('--log-file', '-l', help='Log file.')
     parser.add_argument('--pid-file', '-D', help='Pid file for daemon.')
+    parser.add_argument('--action', '-A', help='Action to perform after rsync')
     parser.add_argument('--rsync-host', '-H', help='Host/SRV to rsync from.')
     parser.add_argument('--remote-path', '-p', help='Remote path to rsync from.')
     parser.add_argument('--target', '-t', help='Local path to rsync to.')
@@ -262,6 +295,7 @@ def main():
             'REMOTE_PATH' : None,
             'TARGET' : None,
             'USER' : default_user,
+            'ACTION' : None,
 
             'DEFAULT_LOG_FILE' : os.path.expanduser('~/nod-rsync.log'),
             'LOG_FILE' : None,
@@ -285,6 +319,9 @@ def main():
     for key in config:
         if key in os.environ:
             config[key] = os.environ[key]
+
+    if args.action is None:
+        args.action = config['ACTION']
 
     if args.rsync_host is None:
         args.rsync_host = config['RSYNC_HOST']

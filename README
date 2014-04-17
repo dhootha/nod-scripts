@@ -38,6 +38,7 @@ SSH - path to the ssh binary
 
 The python script allows some extra options to be set:
 
+ACTION - A command to run after running rsync.  Expands shell variables.
 PERIOD - How often to run rsync, in seconds.
 LOG_FILE - Log to file instead of stderr.  Required for daemon mode.
 PID_FILE - Pid file for daemon mode.
