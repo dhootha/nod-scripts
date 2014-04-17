@@ -381,7 +381,7 @@ def main():
     if args.pid_file is None:
         args.pid_file = config['PID_FILE']
 
-    if args.verbosity == 0:
+    if not args.verbosity:
         logger.setLevel(logging.ERROR)
     elif args.verbosity == 1:
         logger.setLevel(logging.WARNING)
