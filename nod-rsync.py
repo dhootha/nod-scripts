@@ -108,7 +108,7 @@ except ImportError:
         dig_out = tempfile.TemporaryFile()
         dig_err = tempfile.TemporaryFile()
         try:
-            subprocess.check_call([_dig_path, '+short', '-t', 'TXT', query], stdout=dig_out, stderr=dig_err)
+            subprocess.check_call([_dig_path, '+short', '-t', 'TXT', query], stdin=open('/dev/null'), stdout=dig_out, stderr=dig_err)
             dig_out.seek(0)
             return dig_out.read().strip('"\n')
         except subprocess.CalledProcessError as e:
@@ -189,14 +189,14 @@ def run_rsync(args, known_hosts):
                 'ssh -p {port} {ssh_args} {ssh_extra_args}'.format(port=args.ssh_port, ssh_args=args.ssh_args, ssh_extra_args=ssh_extra_args),
                 '{user}@{rsync_host}:{remote_path}'.format(
                     user=args.user, rsync_host=args.rsync_host, remote_path=args.remote_path),
-                args.target], stdout=rsync_out, stderr=rsync_err)
+                args.target], stdin=open('/dev/null'), stdout=rsync_out, stderr=rsync_err)
         else:
             subprocess.check_call([args.wrapsrv_path, '_rsync._tcp.{}'.format(args.rsync_host),
                 args.rsync_path, '-a', '-e',
                 '"ssh -p %p {ssh_args} {ssh_extra_args}"'.format(ssh_args=args.ssh_args, ssh_extra_args=ssh_extra_args),
                 '{user}@%h:{remote_path}'.format(
                     user=args.user, remote_path=args.remote_path),
-                args.target], stdout=rsync_out, stderr=rsync_err)
+                args.target], stdin=open('/dev/null'), stdout=rsync_out, stderr=rsync_err)
     except subprocess.CalledProcessError as e:
         logger.error(str(e))
         rsync_out.seek(0)
