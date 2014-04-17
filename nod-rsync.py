@@ -132,6 +132,9 @@ def load_config(f, config=None):
 
     return config
 
+def abs_path(path):
+    return os.path.abspath(os.path.expandvars(os.path.expanduser(path)))
+
 class KnownHosts:
     def __init__(self, base_url, rsync_host):
         self._temp_file = tempfile.NamedTemporaryFile()
@@ -343,7 +346,7 @@ def main():
         args.target = config['TARGET']
     if not args.target:
         parser.error('target is not set')
-    args.target = os.path.abspath(args.target)
+    args.target = abs_path(args.target)
 
     if args.user is None:
         args.user = config['USER']
@@ -371,7 +374,7 @@ def main():
     if not args.ssh_path:
         parser.error('ssh not available')
     if os.path.sep in args.ssh_path:
-        args.ssh_path = os.path.abspath(args.ssh_path)
+        args.ssh_path = abs_path(args.ssh_path)
 
     if args.ssh_port is None:
         args.ssh_port = int(config['SSH_PORT'])
@@ -381,12 +384,12 @@ def main():
     if not args.rsync_path:
         parser.error('rsync not available')
     if os.path.sep in args.rsync_path:
-        args.rsync_path = os.path.abspath(args.rsync_path)
+        args.rsync_path = abs_path(args.rsync_path)
 
     if args.wrapsrv_path is None:
         args.wrapsrv_path = config['WRAPSRV']
     if os.path.sep in args.wrapsrv_path:
-        args.wrapsrv_path = os.path.abspath(args.wrapsrv_path)
+        args.wrapsrv_path = abs_path(args.wrapsrv_path)
 
     if args.log_file is None:
         args.log_file = config['LOG_FILE']
@@ -407,16 +410,16 @@ def main():
         import daemon
         import daemon.pidlockfile
 
-        handler = logging.FileHandler(os.path.abspath(args.log_file or config['DEFAULT_LOG_FILE']))
+        handler = logging.FileHandler(abs_path(args.log_file or config['DEFAULT_LOG_FILE']))
         handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         logger.addHandler(handler)
 
         with daemon.DaemonContext(files_preserve=[handler.stream],
-                pidfile=daemon.pidlockfile.PIDLockFile(os.path.abspath(args.pid_file))):
+                pidfile=daemon.pidlockfile.PIDLockFile(abs_path(args.pid_file))):
             sync_loop(args)
     else:
         if args.log_file:
-            handler = logging.FileHandler(args.log_file)
+            handler = logging.FileHandler(abs_path(args.log_file))
             handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         else:
             handler = logging.StreamHandler(sys.stderr)
