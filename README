@@ -1,2 +1,34 @@
 These scripts and example configurations are to help use Farsight's
-Newly-Observed Domains service.
+Newly-Observed Domains (NOD) service.
+
+nod-rsync.py and nod-rsync.sh are used to manage rsync of data files for
+the NOD service.  The former runs as a service and the latter is meant to be
+run by cron.
+
+Both scripts load configuration data from /etc/nod-rsync.conf,
+~/.nod-rsync.conf or from environment variables.  The configuration is 
+a set of key=value pairs, one per line.  All configuration options may be
+overridden in the python program with command-line options.
+
+Both scripts require the following options to be set:
+
+RSYNC_HOST - the hostname or service name of the rsync server
+REMOTE_PATH - the remote path on the rsync server to synchronize
+TARGET - the local path that rsync writes to
+
+The following optional variables may also be set:
+
+KNOWN_HOSTS_URL - defaults to https://dl.farsightsecurity.com/....
+USER - the user on the rsync server
+SSH_IDENTITY - overrides the ssh identity file
+SSH_ARGS - any extra arguments to ssh
+PORT - Override the port to connect to via ssh (default 49222)
+RSYNC - path to the rsync binary
+WRAPSRV - path to the wrapsrv binary
+SSH - path to the ssh binary
+
+The python script allows some extra options to be set:
+
+PERIOD - How often to run rsync, in seconds.
+LOG_FILE - Log to file instead of stderr.  Required for daemon mode.
+PID_FILE - Pid file for daemon mode.
