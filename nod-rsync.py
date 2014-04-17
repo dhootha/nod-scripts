@@ -121,6 +121,8 @@ def load_config(f, config=None):
 
     for line in f:
         line = line.strip()
+        line = line.partition('#')[0]
+
         if not line:
             continue
 
