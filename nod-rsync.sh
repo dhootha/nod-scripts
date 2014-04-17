@@ -39,8 +39,7 @@ if [ -r "$HOME/.nod-rsync.conf" ]; then
 fi
 
 if [ -z $RSYNC_HOST ]; then
-	echo "RSYNC_HOST is required" >&2
-	exit 1
+	RSYNC_HOST='rsync.dns-nod.net'
 fi
 
 if [ -z $REMOTE_PATH ]; then
