@@ -120,7 +120,11 @@ def load_config(f, config=None):
         config = dict()
 
     for line in f:
-        key, eq, val = line.strip().partition('=')
+        line = line.strip()
+        if not line:
+            continue
+
+        key, eq, val = line.partition('=')
         val = val.strip('"')
         config[key] = val
 
