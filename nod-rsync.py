@@ -241,6 +241,8 @@ def main():
             help='Run as a daemon.  Requires python-daemon.')
     parser.add_argument('--verbosity', '-v', action='count',
             help='Increase output verbosity.')
+    parser.add_argument('--log-file', '-l', help='Log file.')
+    parser.add_argument('--pid-file', '-D', help='Pid file for daemon.')
     parser.add_argument('--rsync-host', '-H', help='Host/SRV to rsync from.')
     parser.add_argument('--remote-path', '-p', help='Remote path to rsync from.')
     parser.add_argument('--target', '-t', help='Local path to rsync to.')
@@ -260,6 +262,10 @@ def main():
             'REMOTE_PATH' : None,
             'TARGET' : None,
             'USER' : default_user,
+
+            'DEFAULT_LOG_FILE' : os.path.expanduser('~/nod-rsync.log'),
+            'LOG_FILE' : None,
+            'PID_FILE' : os.path.expanduser('~/nod-rsync.pid'),
 
             'PERIOD' : 60,
             'KNOWN_HOSTS_URL' : 'https://dl.farsightsecurity.com/resources/nod/known_hosts.{version}',
@@ -332,6 +338,12 @@ def main():
     if args.wrapsrv_path is None:
         args.wrapsrv_path = config['WRAPSRV']
 
+    if args.log_file is None:
+        args.log_file = config['LOG_FILE']
+
+    if args.pid_file is None:
+        args.pid_file = config['PID_FILE']
+
     if args.verbosity == 0:
         logger.setLevel(logging.ERROR)
     elif args.verbosity == 1:
@@ -345,16 +357,21 @@ def main():
         import daemon
         import daemon.pidlockfile
 
-        handler = logging.FileHandler(os.path.abspath('./nod-rsync.log'))
+        handler = logging.FileHandler(os.path.abspath(args.log_file or config['DEFAULT_LOG_FILE']))
         handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         logger.addHandler(handler)
 
         with daemon.DaemonContext(files_preserve=[handler.stream],
-                pidfile=daemon.pidlockfile.PIDLockFile(os.path.abspath('./nod-rsync.pid'))):
+                pidfile=daemon.pidlockfile.PIDLockFile(os.path.abspath(args.pid_file))):
             sync_loop(args)
     else:
-        handler = logging.StreamHandler(sys.stderr)
-        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        if args.log_file:
+            handler = logging.FileHandler(args.log_file)
+            handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        else:
+            handler = logging.StreamHandler(sys.stderr)
+            handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
         logger.addHandler(handler)
 
         sync_loop(args)
