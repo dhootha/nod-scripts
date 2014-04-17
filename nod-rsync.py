@@ -273,6 +273,7 @@ def main():
             help='Run as a daemon.  Requires python-daemon.')
     parser.add_argument('--verbosity', '-v', action='count',
             help='Increase output verbosity.')
+    parser.add_argument('--config-file', '-c', help='Alternate configuration file.')
     parser.add_argument('--log-file', '-l', help='Log file.')
     parser.add_argument('--pid-file', '-D', help='Pid file for daemon.')
     parser.add_argument('--action', '-A', help='Action to perform after rsync')
@@ -312,9 +313,12 @@ def main():
             'WRAPSRV' : which('wrapsrv'),
             }
 
-    for cfg_file in ('/etc/nod-rsync.conf', os.path.expanduser('~/.nod-rsync.conf')):
-        if os.path.exists(cfg_file) and os.access(cfg_file, os.R_OK):
-            config = load_config(open(cfg_file), config)
+    if args.config_file:
+        config = load_config(open(args.config_file), config)
+    else:
+        for cfg_file in ('/etc/nod-rsync.conf', os.path.expanduser('~/.nod-rsync.conf')):
+            if os.path.exists(cfg_file) and os.access(cfg_file, os.R_OK):
+                config = load_config(open(cfg_file), config)
 
     for key in config:
         if key in os.environ:
