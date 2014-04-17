@@ -343,6 +343,7 @@ def main():
         args.target = config['TARGET']
     if not args.target:
         parser.error('target is not set')
+    args.target = os.path.abspath(args.target)
 
     if args.user is None:
         args.user = config['USER']
@@ -363,12 +364,14 @@ def main():
     if args.ssh_identity is None:
         args.ssh_identity = config['SSH_IDENTITY']
     if args.ssh_identity:
-        args.ssh_args += ' -i {identity}'.format(identity=args.ssh_identity)
+        args.ssh_args += ' -i {identity}'.format(identity=os.path.abspath(args.ssh_identity))
 
     if args.ssh_path is None:
         args.ssh_path = config['SSH']
     if not args.ssh_path:
         parser.error('ssh not available')
+    if os.path.sep in args.ssh_path:
+        args.ssh_path = os.path.abspath(args.ssh_path)
 
     if args.ssh_port is None:
         args.ssh_port = int(config['SSH_PORT'])
@@ -377,9 +380,13 @@ def main():
         args.rsync_path = config['RSYNC']
     if not args.rsync_path:
         parser.error('rsync not available')
+    if os.path.sep in args.rsync_path:
+        args.rsync_path = os.path.abspath(args.rsync_path)
 
     if args.wrapsrv_path is None:
         args.wrapsrv_path = config['WRAPSRV']
+    if os.path.sep in args.wrapsrv_path:
+        args.wrapsrv_path = os.path.abspath(args.wrapsrv_path)
 
     if args.log_file is None:
         args.log_file = config['LOG_FILE']
