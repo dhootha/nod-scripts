@@ -30,10 +30,10 @@
 # RSYNC - path to the rsync binary
 
 import argparse
+import hashlib
 import logging
 import os
 import random
-import sha
 import subprocess
 import sys
 import tempfile
@@ -149,7 +149,7 @@ class KnownHosts:
 
     def check(self):
         self._temp_file.seek(0)
-        sha_hash = sha.new()
+        sha_hash = hashlib.sha1()
         sha_hash.update(self._temp_file.read())
         digest = sha_hash.hexdigest()
 
@@ -162,12 +162,12 @@ class KnownHosts:
         if digest != expected_digest:
             logger.info("Retrieving known hosts version {version}".format(version=file_version))
             try:
-                new_data = http_get(self._url.format(sha1={expected_digest}, version=file_version))
+                new_data = http_get(self._url.format(sha1=expected_digest, version=file_version))
             except HTTPError as e:
                 logger.error(str(e))
                 return False
 
-            new_sha_hash = sha.new()
+            new_sha_hash = hashlib.sha1()
             new_sha_hash.update(new_data)
             new_digest = new_sha_hash.hexdigest()
 
