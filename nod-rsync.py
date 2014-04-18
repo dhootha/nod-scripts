@@ -92,10 +92,10 @@ try:
         try:
             return dns.resolver.query(query, 'TXT')[0].strings[0]
         except dns.resolver.NXDOMAIN as e:
-            logger.error('{}: NXDOMAIN'.format(query))
+            logger.error('{0}: NXDOMAIN'.format(query))
             return ''
         except dns.exception.DNSException as e:
-            logger.error('{}: {}'.format(query, str(e.__class__)))
+            logger.error('{0}: {1}'.format(query, str(e.__class__)))
             return ''
 except ImportError:
     logger.info('dnspython unavailable, using dig')
@@ -196,7 +196,7 @@ def run_rsync(args, known_hosts):
                     user=args.user, rsync_host=args.rsync_host, remote_path=args.remote_path),
                 args.target], stdin=open('/dev/null'), stdout=rsync_out, stderr=rsync_err)
         else:
-            subprocess.check_call([args.wrapsrv_path, '_rsync._tcp.{}'.format(args.rsync_host),
+            subprocess.check_call([args.wrapsrv_path, '_rsync._tcp.{0}'.format(args.rsync_host),
                 args.rsync_path, '-a', '-e',
                 '"ssh -p %p {ssh_args} {ssh_extra_args}"'.format(ssh_args=args.ssh_args, ssh_extra_args=ssh_extra_args),
                 '{user}@%h:{remote_path}'.format(
@@ -225,7 +225,7 @@ def run_action(args):
     try:
         cmd_out = tempfile.TemporaryFile()
         cmd_err = tempfile.TemporaryFile()
-        logger.info('Running action: "{}"'.format(args.action))
+        logger.info('Running action: "{0}"'.format(args.action))
         subprocess.check_call(args.action, shell=True, stdin=open('/dev/null'), stdout=cmd_out, stderr=cmd_err)
         cmd_out.seek(0)
         stdout = cmd_out.read()
@@ -254,7 +254,7 @@ def sync_loop(args):
         run_action(args)
 
     t_sleep=random.random()*args.period
-    logger.debug('sleeping for {}'.format(t_sleep))
+    logger.debug('sleeping for {0}'.format(t_sleep))
     time.sleep(t_sleep)
 
     while True:
@@ -269,7 +269,7 @@ def sync_loop(args):
         t_remaining = args.period - t_elapsed
 
         if t_remaining > 0:
-            logger.debug('sleeping for {}'.format(t_remaining))
+            logger.debug('sleeping for {0}'.format(t_remaining))
             time.sleep(t_remaining)
 
 def main():
